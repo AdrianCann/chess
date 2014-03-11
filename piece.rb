@@ -1,4 +1,5 @@
-require "./board"
+#require "board"
+# require "debugger"
 
 class Piece
 
@@ -19,33 +20,84 @@ class Piece
     board[position] = self
   end
 
-  # helper methods
-
-  def moves
-
+  def is_enemy?(pos)
+    board[pos].color != self.color
   end
 
+  # helper methods
+
+  # move(to_position)
 end
 
 
 class SlidingPiece < Piece
 
-
-  def sel_legal_moves(poss_moves)
-
+  def add_diagonal_moves
+    # debugger
+    diagonal_moves = []
+    DIAGONALS.each do |diag|
+      i = 1
+      new_pos = [(position.first + (diag.first * i)), (position.last + (diag.last * i))]
+      while board.in_grid?(new_pos)
+        if board.is_empty?(new_pos)
+          diagonal_moves << new_pos
+        elsif is_enemy?(new_pos)
+          diagonal_moves << new_pos
+          break
+        else
+          break
+        end
+        i += 1
+        new_pos = [position.first + (diag.first * i), position.last + (diag.last * i)]
+      end
+    end
+    diagonal_moves
   end
 
+  def add_orthogonal_moves
+    orthogonal_moves = []
+    ORTHOGONALS.each do |orth|
+      i = 1
+      new_pos = [position.first + (orth.first * i), position.last + (orth.last * i)]
+      while board.in_grid?(new_pos)
+        if board.is_empty?(new_pos)
+          orthogonal_moves << new_pos
+        elsif is_enemy?(new_pos)
+          orthogonal_moves << new_pos
+          break
+        else
+          break
+        end
+        i += 1
+        new_pos = [position.first + (orth.first * i), position.last + (orth.last * i)]
+      end
+    end
+    orthogonal_moves
+  end
 end
+
+#function to check color of other piece
+
+#board.color_at?(pos)
 
 class SteppingPiece < Piece
 
-  def sel_legal_moves(poss_moves)
-
+  def add_knight_moves
+    knight_moves = []
+    L_MOVES.each do |l_mov|
+      new_pos = [position.first + l_mov.first, position.last + l_mov.last]
+      knight_moves << new_pos if board.in_grid?(new_pos) && (board.is_empty?(new_pos) || is_enemy?(new_pos))
+    end
+    knight_moves
   end
 
 end
 
 class Queen < SlidingPiece
+
+  def moves
+    add_diagonal_moves + add_orthogonal_moves
+  end
 
   def inspect
     "#{color}Q"
@@ -55,6 +107,10 @@ end
 
 class Bishop < SlidingPiece
 
+  def moves
+    add_diagonal_moves
+  end
+
   def inspect
     "#{color}B"
   end
@@ -62,6 +118,10 @@ class Bishop < SlidingPiece
 end
 
 class Rook < SlidingPiece
+
+  def moves
+    add_orthogonal_moves
+  end
 
   def inspect
     "#{color}R"

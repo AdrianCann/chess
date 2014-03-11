@@ -7,9 +7,9 @@ class Board
 
   #create factory method to generate pieces
 
-  def inspect
-    grid.each(&:puts)
-  end
+  # def inspect
+  #   grid.each(&:puts)
+  # end
 
   def [](pos) #return error if position length != 2
     x, y = pos
@@ -22,10 +22,14 @@ class Board
   end
 
   def is_empty?(pos)
-    self[pos] == nil
+    self[pos].nil?
   end
 
   def in_grid?(pos)
     pos.all? {|coord| coord.between?(0, 7)}
+  end
+
+  def color_at(pos)
+    self[pos].color
   end
 end
