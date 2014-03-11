@@ -10,7 +10,8 @@ class Piece
   L_SHAPED = [[1, 2], [1, -2], [-1, -2], [-1, 2],
               [2, 1], [-2, 1], [-2, -1], [2, 1]]
 
-  # KING = [1, 0, -1].product([1, 0, -1]).delete([0, 0])
+  KING = [[1, 0], [-1, 0], [0, 1], [0, -1],
+          [1, 1], [-1, -1],[1, -1],[-1, 1]]
 
   attr_accessor :position
   attr_reader :board, :color
@@ -76,6 +77,48 @@ class SlidingPiece < Piece
   end
 end
 
+class Pawn < Piece
+  def moves
+    the_moves = []
+    case color
+    when :W
+      one_forward = [position.first, position.last - 1]
+      two_forward = [position.first, position.last - 2]
+      capture_left = [position.first - 1, position.last - 1]
+      capture_right = [position.first + 1, position.last - 1]
+
+      the_moves << one_forward
+      the_moves <<  two_forward if position.first == 6
+      the_moves <<  capture_left if is_enemy?(capture_left)
+      the_moves <<  capture_right if is_enemy?(capture_right)
+
+     # if position + [1,1] is_enemy? add move
+      # if position + [-1,1] is_enemy? add move
+    when :B
+      one_forward = [position.first, position.last + 1]
+      two_forward = [position.first, position.last + 2]
+      capture_left = [position.first + 1, position.last + 1]
+      capture_right = [position.first - 1, position.last + 1]
+
+
+      the_moves << one_forward
+      the_moves << two_forward if position.first == 1
+      the_moves << capture_left if is_enemy?(capture_left)
+      the_moves << capture_right if is_enemy?(capture_right)
+
+      #fix case of it trying to capture off of the board...
+    end
+    the_moves
+  end
+
+  def inspect
+    "#{color}P"
+  end
+
+
+
+end
+
 #function to check color of other piece
 
 #board.color_at?(pos)
@@ -84,13 +127,21 @@ class SteppingPiece < Piece
 
   def add_knight_moves
     knight_moves = []
-    L_MOVES.each do |l_mov|
+    L_SHAPED.each do |l_mov|
       new_pos = [position.first + l_mov.first, position.last + l_mov.last]
       knight_moves << new_pos if board.in_grid?(new_pos) && (board.is_empty?(new_pos) || is_enemy?(new_pos))
     end
     knight_moves
   end
 
+  def add_king_moves
+    king_moves = []
+    KING.each do |k_mov|
+      new_pos = [position.first + k_mov.first, position.last + k_mov.last]
+      king_moves << new_pos if board.in_grid?(new_pos) && (board.is_empty?(new_pos) || is_enemy?(new_pos))
+    end
+    king_moves
+  end
 end
 
 class Queen < SlidingPiece
@@ -131,6 +182,10 @@ end
 
 class Knight < SteppingPiece
 
+  def moves
+    add_knight_moves
+  end
+
   def inspect
     "#{color}N"
   end
@@ -138,6 +193,10 @@ class Knight < SteppingPiece
 end
 
 class King < SteppingPiece
+
+  def moves
+    add_king_moves
+  end
 
   def inspect
     "#{color}K"
