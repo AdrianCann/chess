@@ -22,6 +22,7 @@ class Piece
   end
 
   def is_enemy?(pos)
+    return false if board[pos].nil?
     board[pos].color != self.color
   end
 
@@ -82,29 +83,29 @@ class Pawn < Piece
     the_moves = []
     case color
     when :W
-      one_forward = [position.first, position.last - 1]
-      two_forward = [position.first, position.last - 2]
+      one_forward = [position.first - 1, position.last]
+      two_forward = [position.first - 2, position.last]
       capture_left = [position.first - 1, position.last - 1]
-      capture_right = [position.first + 1, position.last - 1]
+      capture_right = [position.first - 1, position.last + 1]
 
       the_moves << one_forward
       the_moves <<  two_forward if position.first == 6
-      the_moves <<  capture_left if is_enemy?(capture_left)
-      the_moves <<  capture_right if is_enemy?(capture_right)
+      the_moves <<  capture_left if board.in_grid?(capture_left) && is_enemy?(capture_left)
+      the_moves <<  capture_right if board.in_grid?(capture_right) && is_enemy?(capture_right)
 
      # if position + [1,1] is_enemy? add move
       # if position + [-1,1] is_enemy? add move
     when :B
-      one_forward = [position.first, position.last + 1]
-      two_forward = [position.first, position.last + 2]
+      one_forward = [position.first + 1, position.last]
+      two_forward = [position.first + 2, position.last]
       capture_left = [position.first + 1, position.last + 1]
-      capture_right = [position.first - 1, position.last + 1]
+      capture_right = [position.first + 1, position.last - 1]
 
 
       the_moves << one_forward
       the_moves << two_forward if position.first == 1
-      the_moves << capture_left if is_enemy?(capture_left)
-      the_moves << capture_right if is_enemy?(capture_right)
+      the_moves << capture_left if board.in_grid?(capture_left) && is_enemy?(capture_left)
+      the_moves << capture_right if board.in_grid?(capture_right) && is_enemy?(capture_right)
 
       #fix case of it trying to capture off of the board...
     end
