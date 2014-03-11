@@ -1,4 +1,4 @@
-require "board.rb"
+require "./board"
 
 class Piece
 
@@ -26,12 +26,13 @@ class Piece
 
   def initialize(position, color, board)
     @position, @color, @board = position, color, board
+    board[position] = self
   end
 
   # helper methods
 
   def moves
-    #get deltas sums up all deltas for a sublcass
+    deltas = get_deltas # see if this calls the pieces own get_deltas
     pos_moves = deltas.map do |delta|
       [position.first + delta.first, position.last + delta.last]
     end.select do |coords|
@@ -39,75 +40,117 @@ class Piece
     end
 
     sel_legal_moves(pos_moves) # overide in slide/step subclass
+  end
 
-    # select legal_moves and return as array
-    # legal moves -- all unblocked moves?
-      # sliding pieces paths are blocked by any piece in their path
-      # stepping pieces are blocked by what's @ the end of their path
+  def get_deltas
+    KING.dup #default
+  end
+
+  def slope(coordinate)
+    x, y = coordinate
+    begin
+      y/x
+    rescue ZeroDivisionError => e
+      :infinity
+    end
   end
 end
 
+  # legal moves -- all unblocked moves?
+    # sliding pieces paths are blocked by any piece in their path
+    # stepping pieces are blocked by what's @ the end of their path
+
 class SlidingPiece < Piece
 
-  def select_legal_moves(poss_moves)
-    # select all legal moves from poss_moves (based on @board) and return array of positions
+  #rook
+  def sel_legal_moves(poss_moves)
+    occupied_coords = poss_moves.reject{|coord| board.is_empty?(coord)}
+    occupied_coords.each do |occ_coord| # by a foreign piece
+
+      # look at all possible moves in the same trajectory
+      # selects the poss_moves ON THAT TRAJECTORY that are further from self than the piece  -- GREATER IN MAGNITUDE (use &:abs)
+      illegal_moves = poss_moves.select do |pos_mov|
+        occ_delta = [occ_coord.first - position.first, occ_cord.last - position.last]
+        pos_delta = [pos_coord.first - position.first, pos_cord.last - position.last]
+
+        slope(occ_delta) == slope(pos_delta)
+      end.select do |pos_mov|
+        occ_cord.first.abs <= pos_mov.first.abs
+        occ_cord.last.abs <= pos_mov.last.abs
+       end
+
+      illegal_moves << shovel_that
+    end
+
+    poss_moves - illegal_moves
   end
 
 end
 
 class SteppingPiece < Piece
 
-
-
-
-  def select_legal_moves(poss_moves)
-    # select all legal moves from poss_moves (based on @board) and return array of positions
+  def sel_legal_moves(poss_moves)
+    poss_moves.select {|p_mov| board.is_empty?(p_mov)} # || enemy piece
   end
 
 end
 
 class Queen < SlidingPiece
-  DIAGONALS && ORTHOGONALS
+
+  def get_deltas
+    DIAGONALS.dup + ORTHOGONALS.dup
+  end
+
+  def inspect
+    "#{color}Q"
+  end
+
 end
 
 class Bishop < SlidingPiece
-  DIAGONALS
+
+  def get_deltas
+    DIAGONALS.dup
+  end
+
+  def inspect
+    "#{color}B"
+  end
+
 end
 
 class Rook < SlidingPiece
-  ORTHOGONALS
+
+  def get_deltas
+    ORTHOGONALS.dup
+  end
+
+  def inspect
+    "#{color}R"
+  end
+
 end
 
 class Knight < SteppingPiece
-  L-SHAPED
+
+  def get_deltas
+    L_SHAPED.dup
+  end
+
+  def inspect
+    "#{color}N"
+  end
+
 end
 
 class King < SteppingPiece
-  KING
+
+  def get_deltas
+    KING.dup # default   # DRY later
+  end
+
+  def inspect
+    "#{color}K"
+  end
+
 end
-
-
-
-
-=begin
-
-DIAGONALS
-
-ORTHOGONALS
-
-L-SHAPED
-
-KING
-
-
-diagonals
-
-[1,1], [2,2], [3,3] ... [8,8]
-[1, -1] ... [8, -8]
-...
-
-possible moves << coord + delta
-
-
-
-=end
