@@ -26,6 +26,12 @@ class Piece
     board[pos].color != self.color
   end
 
+  def move_into_check?(pos)
+    new_board = self.board.deep_dup
+    new_board.move!(self.position, pos)
+    new_board.in_check?(self.color)
+  end
+
   # helper methods
 end
 
