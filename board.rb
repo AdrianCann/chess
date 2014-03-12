@@ -34,8 +34,6 @@ class Board
 
   def move(start_coord, end_coord)
     piece_to_move = self[start_coord]
-    raise IllegalMoveError.new("No piece at that square!") if piece_to_move.nil?
-    raise IllegalMoveError.new("Not a valid move!") unless piece_to_move.moves.include?(end_coord)
 
     raise IllegalMoveError.new("Your King is in Danger!") if piece_to_move.move_into_check?(end_coord) #piece_to_move.valid_move?(end_coord)
 
@@ -45,8 +43,6 @@ class Board
 
   def move!(start_coord, end_coord)
     piece_to_move = self[start_coord]
-    raise IllegalMoveError.new("No piece at that square!") if piece_to_move.nil?
-    raise IllegalMoveError.new("Not a valid move!") unless piece_to_move.moves.include?(end_coord)
 
     self[start_coord], self[end_coord] = nil, piece_to_move
     piece_to_move.position = end_coord
@@ -87,7 +83,7 @@ class Board
       puts ""
     end
     print "  "; BOARD_WIDTH.times{ print "-"}; puts ""
-    print "  "; grid.length.times{ |i| print "   #{i}  "}
+    print "  "; grid.length.times{ |i| print "   #{i}  "}; puts ""
 
     nil
   end

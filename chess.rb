@@ -5,7 +5,7 @@ class Chess
   attr_reader :board_game, :players, :current_player
 
   def initialize
-    @board_game = Board.new
+    @board_game = Board.new # setup_board factory method
     @board_game.setup_board
     @players = [Human.new(:W, board_game), Human.new(:B, board_game)]
   end
@@ -13,26 +13,32 @@ class Chess
   def play
     @current_player = players.first
     until over?
-
       board_game.render
-
-      begin
-        current_player.take_turn
-      rescue IllegalMoveError => e
-        puts ""
-        puts "Illegal move. #{e.message} Please try again."
-        board_game.render
-        retry
-      end
-
-      @current_player = new_player
+      handle_turn
+      @current_player = next_player
     end
 
     board_game.render
     puts "Checkmate."
   end
 
-  def new_player
+  private
+  def handle_turn
+    puts "Take turn, #{current_player.color} player:"
+
+    begin # <= candidate for helper method
+      current_player.get_turn
+    rescue IllegalMoveError => e
+      puts "Illegal move. #{e.message} Please try again."
+      board_game.render
+      retry
+    rescue ArgumentError => e
+      puts "#{e.message} Please try again."
+      retry
+    end
+  end
+
+  def next_player
     @current_player == players.last ? players.first : players.last
   end
 
@@ -50,35 +56,40 @@ class Human
     @game_board = game_board
   end
 
-  def take_turn
-    puts ""
-    puts "Take turn, #{color.to_s} player:"
-
+  def get_turn
     input = gets.chomp
     coord_from, coord_to = parse(input)
+    selected_piece = game_board[coord_from]
 
-    raise IllegalMoveError.new("That's not your piece!") if game_board[coord_from].color != color
+    handle_move_errors(selected_piece, coord_to)
     game_board.move(coord_from, coord_to)
   end
 
+  private
+  def handle_move_errors(selected_piece, end_coord)
+    missing_piece = IllegalMoveError.new("No piece at that square!")
+    enemy_piece = IllegalMoveError.new("That's not your piece!")
+    invalid_move = IllegalMoveError.new("Not a valid move!")
+
+    raise missing_piece if selected_piece.nil?
+    raise enemy_piece unless selected_piece.color == color
+    raise invalid_move unless selected_piece.moves.include?(end_coord)
+  end
+
   def parse(command)
-    # later: use regex to differentiate type of command
-    # "1,2 3,4" <= default
-    # "f2 a3"
-    # misc notation
+    digits = command.scan(/\d/) # scan for digits
+    raise ArgumentError.new("I don't understand.") if digits.length < 4
 
-    # use regex to raise an error if nothing matches
+    digits.map!{ |dig| Integer(dig) } # map digit chars to actual integers
+    # return coordinate pair
+    # => coordinate pair is in format [[inv(y), x], [inv(y), x]]
+    [
+      [ inv_y(digits[1]), digits[0] ],
+      [ inv_y(digits[3]), digits[2] ]
+    ]
+  end
 
-    coordinate_pair = command.split(" ")        # "1,2 3,4" => ["1,2", "3,4"]
-    coordinate_pair.map! do |coord|             # => "1,2"
-
-      pars_coord = coord.split(",")               # "1,2" => ["1", "2"]
-      pars_coord.map! {|coord| Integer(coord)}    # ["1", "2"] => [1, 2]
-      pars_coord.reverse!                         # [1, 2] => [2, 1]
-      pars_coord.last = (pars_coord.last - 7).abs #[2, 1] => [2, 6]
-                                                  # [[2,6], "3,4"]
-    end
-
-    coordinate_pair                               # [[2,6], [4,4]]
+  def inv_y(int) # invert y - axis
+    (int-7).abs
   end
 end
