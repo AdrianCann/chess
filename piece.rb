@@ -88,22 +88,19 @@ class Pawn < Piece
       capture_left = [position.first - 1, position.last - 1]
       capture_right = [position.first - 1, position.last + 1]
 
-      the_moves << one_forward
-      the_moves <<  two_forward if position.first == 6
-      the_moves <<  capture_left if board.in_grid?(capture_left) && is_enemy?(capture_left)
-      the_moves <<  capture_right if board.in_grid?(capture_right) && is_enemy?(capture_right)
+      the_moves << one_forward if board.is_empty?(one_forward)
+      the_moves << two_forward if position.first == 6 && (board.is_empty?(one_forward) && board.is_empty?(two_forward))
+      the_moves << capture_left if board.in_grid?(capture_left) && is_enemy?(capture_left)
+      the_moves << capture_right if board.in_grid?(capture_right) && is_enemy?(capture_right)
 
-     # if position + [1,1] is_enemy? add move
-      # if position + [-1,1] is_enemy? add move
     when :B
       one_forward = [position.first + 1, position.last]
       two_forward = [position.first + 2, position.last]
       capture_left = [position.first + 1, position.last + 1]
       capture_right = [position.first + 1, position.last - 1]
 
-
-      the_moves << one_forward
-      the_moves << two_forward if position.first == 1
+      the_moves << one_forward if board.is_empty?(one_forward)
+      the_moves << two_forward if position.first == 1 && (board.is_empty?(one_forward) && board.is_empty?(two_forward))
       the_moves << capture_left if board.in_grid?(capture_left) && is_enemy?(capture_left)
       the_moves << capture_right if board.in_grid?(capture_right) && is_enemy?(capture_right)
 
@@ -116,13 +113,7 @@ class Pawn < Piece
     "#{color}P"
   end
 
-
-
 end
-
-#function to check color of other piece
-
-#board.color_at?(pos)
 
 class SteppingPiece < Piece
 

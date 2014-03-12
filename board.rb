@@ -1,9 +1,51 @@
 class Board
   attr_accessor :grid
 
+
+
   def initialize(grid=Array.new(8) {Array.new(8)})
     @grid = grid
   end
+
+  def setup_board
+    self[[0, 0]] = Rook.new([0, 0], :B, self)
+    self[[0, 1]] = Knight.new([0, 1], :B, self)
+    self[[0, 2]] = Bishop.new([0,2], :B, self)
+    self[[0, 3]] = Queen.new([0,3], :B, self)
+    self[[0, 4]] = King.new([0,4], :B, self)
+    self[[0, 5]] = Bishop.new([0,5], :B, self)
+    self[[0, 6]] = Knight.new([0, 6], :B, self)
+    self[[0, 7]] = Rook.new([0, 7], :B, self)
+
+    grid[1].count.times { |index| self[[1, index]] = Pawn.new([1,index], :B, self)}# make pawns
+
+    self[[7, 0]] = Rook.new([7, 0], :W, self)
+    self[[7, 1]] = Knight.new([7, 1], :W, self)
+    self[[7, 2]] = Bishop.new([7,2], :W, self)
+    self[[7, 3]] = Queen.new([7,3], :W, self)
+    self[[7, 4]] = King.new([7,4], :W, self)
+    self[[7, 5]] = Bishop.new([7,5], :W, self)
+    self[[7, 6]] = Knight.new([7, 6], :W, self)
+    self[[7, 7]] = Rook.new([7, 7], :W, self)
+
+
+    grid[6].count.times { |index| self[[6, index]] = Pawn.new([6,index], :W, self)}# make pawns
+
+  end
+
+  def move(start_coord, end_coord)
+    piece_to_move = self[[start_coord]]
+    if piece_to_move.moves.include?(end_coord)
+      self[[start_coord]], self[[end_coord]] = nil, piece_to_move
+      piece_to_move.position = end_coord
+    end
+  end
+
+  # pretty_render
+  # end
+
+  # in_check?
+  # end
 
   #create factory method to generate pieces
 
@@ -12,7 +54,7 @@ class Board
   # end
 
   def [](pos) #return error if position length != 2
-    x, y = pos
+    x, y = pos # REMEMBER TO SWAP CO-ORDINATES IN PARSE COMMAND
     @grid[x][y]
   end
 
