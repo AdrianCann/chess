@@ -1,6 +1,3 @@
-#require "board"
-# require "debugger"
-
 class Piece
 
   DIAGONALS = [[1, 1], [-1, 1], [-1, -1], [1, -1]]
