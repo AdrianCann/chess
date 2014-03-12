@@ -52,6 +52,27 @@ class Board
     piece_to_move.position = end_coord
   end
 
+  def checkmate?(color)
+    if in_check?(color)
+      grid.each do |row|
+        row.each do |piece|
+          next if piece.nil?
+          if piece.color == color
+            piece.moves.each do |move|
+
+              return false unless piece.move_into_check?(move)
+
+            end
+          end
+        end
+      end
+
+      return true
+    end
+
+    false
+  end
+
   def render
     grid.each do |row|
       BOARD_WIDTH.times{print "-"}
