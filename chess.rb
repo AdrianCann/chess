@@ -72,12 +72,13 @@ class Human
     coordinate_pair = command.split(" ")        # "1,2 3,4" => ["1,2", "3,4"]
     coordinate_pair.map! do |coord|             # => "1,2"
 
-      pars_coord = coord.split(",")             # "1,2" => ["1", "2"]
-      pars_coord.map! { |coord| Integer(coord)} # ["1", "2"] => [1, 2]
-      pars_coord.reverse                        # [1, 2] => [2, 1]
-                                                # [[2,1], "3,4"]
+      pars_coord = coord.split(",")               # "1,2" => ["1", "2"]
+      pars_coord.map! {|coord| Integer(coord)}    # ["1", "2"] => [1, 2]
+      pars_coord.reverse!                         # [1, 2] => [2, 1]
+      pars_coord.last = (pars_coord.last - 7).abs #[2, 1] => [2, 6]
+                                                  # [[2,6], "3,4"]
     end
 
-    coordinate_pair                              # [[2,1], [4,3]]
+    coordinate_pair                               # [[2,6], [4,4]]
   end
 end

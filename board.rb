@@ -74,9 +74,9 @@ class Board
   end
 
   def render
-    grid.each do |row|
-      BOARD_WIDTH.times{print "-"}
-      puts
+    grid.each_with_index do |row, num|
+      print "  "; BOARD_WIDTH.times{print "-"}; puts ""
+      print "#{(num-7).abs} "
       row.each do |tile|
         if tile.nil?
           print "|    |"
@@ -84,9 +84,10 @@ class Board
           print "| #{tile.inspect} |"
         end
       end
-      puts
+      puts ""
     end
-    BOARD_WIDTH.times{print "-"}
+    print "  "; BOARD_WIDTH.times{ print "-"}; puts ""
+    print "  "; grid.length.times{ |i| print "   #{i}  "}
 
     nil
   end
