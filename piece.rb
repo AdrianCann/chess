@@ -27,10 +27,7 @@ class Piece
   end
 
   # helper methods
-
-  # move(to_position)
 end
-
 
 class SlidingPiece < Piece
 
@@ -103,8 +100,6 @@ class Pawn < Piece
       the_moves << two_forward if position.first == 1 && (board.is_empty?(one_forward) && board.is_empty?(two_forward))
       the_moves << capture_left if board.in_grid?(capture_left) && is_enemy?(capture_left)
       the_moves << capture_right if board.in_grid?(capture_right) && is_enemy?(capture_right)
-
-      #fix case of it trying to capture off of the board...
     end
     the_moves
   end

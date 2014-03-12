@@ -66,6 +66,7 @@ class Board
 
     grid.each do |row|
       row.each do |piece|
+        next if piece.nil?
         king_position = piece.position if piece.instance_of?(King) && piece.color == color
         opposite_color << piece if piece.color != color
       end
@@ -77,13 +78,6 @@ class Board
 
     false
   end
-
-
-  #create factory method to generate pieces
-
-  # def inspect
-  #   grid.each(&:puts)
-  # end
 
   def [](pos) #return error if position length != 2
     x, y = pos # REMEMBER TO SWAP CO-ORDINATES IN PARSE COMMAND
