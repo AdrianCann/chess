@@ -1,11 +1,9 @@
+require "debugger"
+
 class Piece
 
   DIAGONALS = [[1, 1], [-1, 1], [-1, -1], [1, -1]]
-
   ORTHOGONALS = [[0, 1], [0, -1], [1, 0], [-1, 0]]
-
-  L_SHAPED = [[1, 2], [1, -2], [-1, -2], [-1, 2],
-              [2, 1], [-2, 1], [-2, -1], [2, 1]]
 
   attr_accessor :position
   attr_reader :board, :color
@@ -25,23 +23,9 @@ class Piece
     new_board.move!(self.position, pos)
     new_board.in_check?(self.color)
   end
-end
 
-class SlidingPiece < Piece
-  def get_sliding_moves(directions)
-    moves = []
-    directions.each do |dir|
-      i = 1
-      new_pos = [position.first + dir.first, position.last + dir.last]
-      while board.in_grid?(new_pos)
-        moves << new_pos if board.is_empty?(new_pos) || is_enemy?(new_pos)
-        break unless board.is_empty?(new_pos)
-        i += 1
-        new_pos = [position.first + (dir.first * i), position.last + (dir.last * i)]
-      end
-    end
-
-    moves
+  def delta(dir, mod = 1)
+    [position.first + (dir.first * mod), position.last + (dir.last * mod)]
   end
 end
 
@@ -54,31 +38,25 @@ class Pawn < Piece
     case color
     when :W
       moves = get_pawn_moves(PAWN_MOVES_W)
-
-      # one_forward = [position.first - 1, position.last]
- #      two_forward = [position.first - 2, position.last]
- #      capture_left = [position.first - 1, position.last - 1]
- #      capture_right = [position.first - 1, position.last + 1]
- #
- #      the_moves << one_forward if board.is_empty?(one_forward)
- #      the_moves << two_forward if position.first == 6 && (board.is_empty?(one_forward) && board.is_empty?(two_forward))
- #      the_moves << capture_left if board.in_grid?(capture_left) && is_enemy?(capture_left)
- #      the_moves << capture_right if board.in_grid?(capture_right) && is_enemy?(capture_right)
-
     when :B
       moves = get_pawn_moves(PAWN_MOVES_B)
-
-      # one_forward = [position.first + 1, position.last]
-      # two_forward = [position.first + 2, position.last]
-      # capture_left = [position.first + 1, position.last + 1]
-      # capture_right = [position.first + 1, position.last - 1]
-      #
-      # the_moves << one_forward if board.is_empty?(one_forward)
-      # the_moves << two_forward if position.first == 1 && (board.is_empty?(one_forward) && board.is_empty?(two_forward))
-      # the_moves << capture_left if board.in_grid?(capture_left) && is_enemy?(capture_left)
-      # the_moves << capture_right if board.in_grid?(capture_right) && is_enemy?(capture_right)
     end
-    the_moves
+    moves
+  end
+
+  def get_pawn_moves(mvs)  #delta takes an argument (always positive?)
+    moves = []
+    copy = mvs.dup
+    copy.map!{ |dir| delta(dir) }.select!{|mv| board.in_grid?(mv) }
+
+    moves << copy[0] if board.is_empty?(copy[0])
+    if color == :B && position.first == 1 || color == :W && position.first == 6
+      moves << copy[1] if board.is_empty?(copy[0]) && board.is_empty?(copy[1])
+    end
+    moves << copy[2] if is_enemy?(copy[2])
+    moves << copy[3] if is_enemy?(copy[2])
+
+    moves
   end
 
   def inspect
@@ -87,24 +65,35 @@ class Pawn < Piece
 
 end
 
-class SteppingPiece < Piece
-
-  def add_knight_moves
-    knight_moves = []
-    L_SHAPED.each do |l_mov|
-      new_pos = [position.first + l_mov.first, position.last + l_mov.last]
-      knight_moves << new_pos if board.in_grid?(new_pos) && (board.is_empty?(new_pos) || is_enemy?(new_pos))
+class SlidingPiece < Piece
+  def get_sliding_moves(directions)
+    moves = []
+    directions.each do |dir|
+      i = 1
+      new_pos = delta(dir)
+      while board.in_grid?(new_pos)
+        moves << new_pos if board.is_empty?(new_pos) || is_enemy?(new_pos)
+        break unless board.is_empty?(new_pos)
+        i += 1
+        new_pos = delta(dir, i)
+      end
     end
-    knight_moves
+
+    moves
   end
+end
 
-  def add_king_moves
-    king_moves = []
-    (DIAGONALS + ORTHOGONALS).each do |k_mov|
-      new_pos = [position.first + k_mov.first, position.last + k_mov.last]
-      king_moves << new_pos if board.in_grid?(new_pos) && (board.is_empty?(new_pos) || is_enemy?(new_pos))
+class SteppingPiece < Piece
+  def get_stepping_moves(directions)
+    moves = []
+    directions.each do |dir|
+      new_pos = delta(dir)
+      if board.in_grid?(new_pos)
+        moves << new_pos if board.is_empty?(new_pos) || is_enemy?(new_pos)
+      end
     end
-    king_moves
+
+    moves
   end
 end
 
@@ -146,8 +135,11 @@ end
 
 class Knight < SteppingPiece
 
+  L_SHAPED = [[1, 2], [1, -2], [-1, -2], [-1, 2],
+              [2, 1], [-2, 1], [-2, -1], [2, 1]]
+
   def moves
-    add_knight_moves
+    get_stepping_moves(L_SHAPED)
   end
 
   def inspect
@@ -159,7 +151,7 @@ end
 class King < SteppingPiece
 
   def moves
-    add_king_moves
+    get_stepping_moves(ORTHOGONALS + DIAGONALS)
   end
 
   def inspect
