@@ -1,4 +1,4 @@
-require "debugger"
+require "./colorize"
 
 class Piece
 
@@ -24,6 +24,7 @@ class Piece
     new_board.in_check?(self.color)
   end
 
+  private
   def delta(dir, mod = 1)
     [position.first + (dir.first * mod), position.last + (dir.last * mod)]
   end
@@ -36,21 +37,26 @@ class Pawn < Piece
   def moves
     moves = []
     case color
-    when :W
+    when :white
       moves = get_pawn_moves(PAWN_MOVES_W)
-    when :B
+    when :light_black
       moves = get_pawn_moves(PAWN_MOVES_B)
     end
     moves
   end
 
+  def inspect
+    "P".colorize(color)
+  end
+
+  private
   def get_pawn_moves(mvs)  #delta takes an argument (always positive?)
     moves = []
     copy = mvs.dup
     copy.map!{ |dir| delta(dir) }.select!{|mv| board.in_grid?(mv) }
 
     moves << copy[0] if board.is_empty?(copy[0])
-    if color == :B && position.first == 1 || color == :W && position.first == 6
+    if color == :light_black && position.first == 1 || color == :white && position.first == 6
       moves << copy[1] if board.is_empty?(copy[0]) && board.is_empty?(copy[1])
     end
     moves << copy[2] if is_enemy?(copy[2])
@@ -58,14 +64,10 @@ class Pawn < Piece
 
     moves
   end
-
-  def inspect
-    "#{color}P"
-  end
-
 end
 
 class SlidingPiece < Piece
+  private
   def get_sliding_moves(directions)
     moves = []
     directions.each do |dir|
@@ -84,6 +86,7 @@ class SlidingPiece < Piece
 end
 
 class SteppingPiece < Piece
+  private
   def get_stepping_moves(directions)
     moves = []
     directions.each do |dir|
@@ -104,7 +107,7 @@ class Queen < SlidingPiece
   end
 
   def inspect
-    "#{color}Q"
+    "Q".colorize(color)
   end
 
 end
@@ -116,7 +119,7 @@ class Bishop < SlidingPiece
   end
 
   def inspect
-    "#{color}B"
+    "B".colorize(color)
   end
 
 end
@@ -128,7 +131,7 @@ class Rook < SlidingPiece
   end
 
   def inspect
-    "#{color}R"
+    "R".colorize(color)
   end
 
 end
@@ -143,7 +146,7 @@ class Knight < SteppingPiece
   end
 
   def inspect
-    "#{color}N"
+    "N".colorize(color)
   end
 
 end
@@ -155,7 +158,7 @@ class King < SteppingPiece
   end
 
   def inspect
-    "#{color}K"
+    "K".colorize(color)
   end
 
 end

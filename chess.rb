@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 require "./piece"
 require "./board"
 
@@ -5,9 +7,8 @@ class Chess
   attr_reader :board_game, :players, :current_player
 
   def initialize
-    @board_game = Board.new # setup_board factory method
-    @board_game.setup_board
-    @players = [Human.new(:W, board_game), Human.new(:B, board_game)]
+    @board_game = Board.new.setup_board
+    @players = [Human.new(:white, board_game), Human.new(:light_black, board_game)]
   end
 
   def play
@@ -92,4 +93,8 @@ class Human
   def inv_y(int) # invert y - axis
     (int-7).abs
   end
+end
+
+if __FILE__ == $PROGRAM_NAME
+  Chess.new.play
 end

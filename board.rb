@@ -1,9 +1,5 @@
-# factory method -- board.setup
-# compact the one if-else
-# split up setup board [array of objects]
-
 class Board
-  BOARD_WIDTH = 48
+  BOARD_WIDTH = 40
 
   attr_accessor :grid
 
@@ -12,30 +8,23 @@ class Board
   end
 
   def setup_board
-    self[[0, 0]] = Rook.new([0, 0], :B, self)
-    self[[0, 1]] = Knight.new([0, 1], :B, self)
-    self[[0, 2]] = Bishop.new([0,2], :B, self)
-    self[[0, 3]] = Queen.new([0,3], :B, self)
-    self[[0, 4]] = King.new([0,4], :B, self)
-    self[[0, 5]] = Bishop.new([0,5], :B, self)
-    self[[0, 6]] = Knight.new([0, 6], :B, self)
-    self[[0, 7]] = Rook.new([0, 7], :B, self)
+    place_side(0, 1, :light_black)
+    place_side(7, 6, :white)
 
-    grid[1].count.times { |index| self[[1, index]] = Pawn.new([1,index], :B, self)} # make pawns
-
-    self[[7, 0]] = Rook.new([7, 0], :W, self)
-    self[[7, 1]] = Knight.new([7, 1], :W, self)
-    self[[7, 2]] = Bishop.new([7,2], :W, self)
-    self[[7, 3]] = Queen.new([7,3], :W, self)
-    self[[7, 4]] = King.new([7,4], :W, self)
-    self[[7, 5]] = Bishop.new([7,5], :W, self)
-    self[[7, 6]] = Knight.new([7, 6], :W, self)
-    self[[7, 7]] = Rook.new([7, 7], :W, self)
-
-    grid[6].count.times { |index| self[[6, index]] = Pawn.new([6,index], :W, self)} # make pawns
+    self
   end
 
-  def move(start_coord, end_coord) # move should call move1
+  def place_side(row, pawn_row, color)
+    back_row_pieces = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
+    grid.length.times do |i|
+      self[[row, i]] = back_row_pieces[i].new([row, i], color, self)
+      self[[pawn_row, i]] = Pawn.new([pawn_row, i], color, self)
+    end
+
+    nil # side effect method
+  end
+
+  def move(start_coord, end_coord)
     king_in_danger = IllegalMoveError.new("Your King is in Danger!")
     raise king_in_danger if self[start_coord].move_into_check?(end_coord)
 
@@ -62,19 +51,23 @@ class Board
 
   def render
     grid.each_with_index do |row, num|
+
       print "  "; BOARD_WIDTH.times{print "-"}; puts ""
       print "#{(num-7).abs} "
+
       row.each do |tile|
-        if tile.nil? # compact if-else
-          print "|    |"
+        if tile.nil?
+          print "|   |"
         else
           print "| #{tile.inspect} |"
         end
       end
       puts ""
     end
+
+    # print bottom numbers
     print "  "; BOARD_WIDTH.times{ print "-"}; puts ""
-    print "  "; grid.length.times{ |i| print "   #{i}  "}; puts ""
+    print "  "; grid.length.times{ |i| print "  #{i}  "}; puts ""
 
     nil
   end
