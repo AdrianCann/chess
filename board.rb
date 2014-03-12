@@ -1,7 +1,7 @@
 class Board
+  BOARD_WIDTH = 48
+
   attr_accessor :grid
-
-
 
   def initialize(grid=Array.new(8) {Array.new(8)})
     @grid = grid
@@ -34,18 +34,50 @@ class Board
   end
 
   def move(start_coord, end_coord)
-    piece_to_move = self[[start_coord]]
-    if piece_to_move.moves.include?(end_coord)
-      self[[start_coord]], self[[end_coord]] = nil, piece_to_move
-      piece_to_move.position = end_coord
-    end
+    piece_to_move = self[start_coord]
+    raise IllegalMoveError.new("No piece at that square!") if piece_to_move.nil?
+    raise IllegalMoveError.new("Not a valid move!") unless piece_to_move.moves.include?(end_coord)
+
+    self[start_coord], self[end_coord] = nil, piece_to_move
+    piece_to_move.position = end_coord
   end
 
-  # pretty_render
-  # end
+  def render
+    grid.each do |row|
+      BOARD_WIDTH.times{print "-"}
+      puts
+      row.each do |tile|
+        if tile.nil?
+          print "|    |"
+        else
+          print "| #{tile.inspect} |"
+        end
+      end
+      puts
+    end
+    BOARD_WIDTH.times{print "-"}
 
-  # in_check?
-  # end
+    nil
+  end
+
+  def in_check?(color)
+    opposite_color = []
+    king_position = []
+
+    grid.each do |row|
+      row.each do |piece|
+        king_position = piece.position if piece.instance_of?(King) && piece.color == color
+        opposite_color << piece if piece.color != color
+      end
+    end
+
+    opposite_color.each do |enemy|
+      return true if enemy.moves.include?(king_position)
+    end
+
+    false
+  end
+
 
   #create factory method to generate pieces
 
@@ -74,4 +106,7 @@ class Board
   def color_at(pos)
     self[pos].color
   end
+end
+
+class IllegalMoveError < StandardError
 end
