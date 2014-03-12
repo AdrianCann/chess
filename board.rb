@@ -79,6 +79,18 @@ class Board
     false
   end
 
+  def deep_dup
+    new_board = Board.new
+    grid.each do |row|
+      row.each do |piece|
+        next if piece.nil?
+        piece_new = piece.class.new(piece.position.dup, piece.color, new_board)
+        new_board[piece.position] = piece_new
+      end
+    end
+    new_board
+  end
+
   def [](pos) #return error if position length != 2
     x, y = pos # REMEMBER TO SWAP CO-ORDINATES IN PARSE COMMAND
     @grid[x][y]
