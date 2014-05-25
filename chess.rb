@@ -76,8 +76,26 @@ class Human
     raise enemy_piece unless selected_piece.color == color
     raise invalid_move unless selected_piece.moves.include?(end_coord)
   end
+  
+  def initial_parse(command) #change from chess readable format
+    dict = Board::LETTERS.invert
+    string = ""
+    command.chars.map! do |char|
+      if /[A-H]/.match(char)
+       string += (dict[char] - 1).to_s
+     elsif /[1-8]/.match(char)
+       num = (Integer(char) - 1)
+       string += num.to_s
+     else
+       raise ArgumentError.new("I don't understand input.")
+     end
+    end
+    string
+  end
 
   def parse(command)
+    command = initial_parse(command)
+    
     digits = command.scan(/\d/) # scan for digits
     raise ArgumentError.new("I don't understand.") if digits.length < 4
 

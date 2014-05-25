@@ -48,12 +48,24 @@ class Board
 
     false
   end
+  
+  LETTERS = {
+    1 => "A",
+    2 => "B",
+    3 => "C",
+    4 => "D",
+    5 => "E",
+    6 => "F",
+    7 => "G",
+    8 => "H"
+  }
 
   def render
     grid.each_with_index do |row, num|
 
       print "  "; BOARD_WIDTH.times{print "-"}; puts ""
-      print "#{(num-7).abs} "
+      
+      print "#{(num-7).abs + 1} "
 
       row.each do |tile|
         if tile.nil?
@@ -67,7 +79,7 @@ class Board
 
     # print bottom numbers
     print "  "; BOARD_WIDTH.times{ print "-"}; puts ""
-    print "  "; grid.length.times{ |i| print "  #{i}  "}; puts ""
+    print "  "; grid.length.times{ |i| print "  #{LETTERS[i+1]}  "}; puts ""
 
     nil
   end
