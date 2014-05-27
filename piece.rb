@@ -46,7 +46,7 @@ class Pawn < Piece
   end
 
   def inspect
-    "P".colorize(color)
+    color == :white ? "\u2659" : "\u265F"
   end
 
   private
@@ -107,7 +107,7 @@ class Queen < SlidingPiece
   end
 
   def inspect
-    "Q".colorize(color)
+    color == :white ? "\u2655" : "\u265B"
   end
 
 end
@@ -119,7 +119,7 @@ class Bishop < SlidingPiece
   end
 
   def inspect
-    "B".colorize(color)
+    color == :white ? "\u2657" : "\u265D"
   end
 
 end
@@ -131,7 +131,7 @@ class Rook < SlidingPiece
   end
 
   def inspect
-    "R".colorize(color)
+    color == :white ? "\u2656" : "\u265C"
   end
 
 end
@@ -146,7 +146,7 @@ class Knight < SteppingPiece
   end
 
   def inspect
-    "N".colorize(color)
+    color == :white ? "\u2658" : "\u265E"
   end
 
 end
@@ -158,7 +158,7 @@ class King < SteppingPiece
   end
 
   def inspect
-    "K".colorize(color)
+    color == :white ? "\u2654" : "\u265A"
   end
 
 end
