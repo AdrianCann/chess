@@ -139,7 +139,7 @@ end
 class Knight < SteppingPiece
 
   L_SHAPED = [[1, 2], [1, -2], [-1, -2], [-1, 2],
-              [2, 1], [-2, 1], [-2, -1], [2, 1]]
+              [2, 1], [-2, 1], [-2, -1], [2, -1]]
 
   def moves
     get_stepping_moves(L_SHAPED)
