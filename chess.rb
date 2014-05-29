@@ -2,13 +2,16 @@
 
 require "./piece"
 require "./board"
+require 'yaml'
 
 class Chess
   attr_reader :board_game, :players, :current_player
 
-  def initialize
-    @board_game = Board.new.setup_board
-    @players = [Human.new(:white, board_game), Human.new(:light_black, board_game)]
+  def initialize(board_game = nil, black_to_move = false)
+    @board_game = board_game
+    @board_game ||= Board.new.setup_board
+    @players = [Human.new(:white, @board_game, self), Human.new(:light_black, @board_game, self)]
+    @players.reverse! if black_to_move
   end
 
   def play
@@ -21,6 +24,18 @@ class Chess
 
     board_game.render
     puts "Checkmate."
+  end
+  
+  def save_game
+    puts "name your game"
+    name = gets.chomp
+    name += ".rf"
+    board = board_game.to_yaml
+    f = File.new(name, "w")
+    f.puts board
+    f.puts "DIVIDE"
+    f.puts current_player.color
+    f.close
   end
 
   private
@@ -51,14 +66,20 @@ end
 class Human
   attr_accessor :game_board
   attr_reader :color
+  attr_reader :game
 
-  def initialize(color, game_board)
+  def initialize(color, game_board, game)
     @color = color
     @game_board = game_board
+    @game = game
   end
 
   def get_turn
     input = gets.chomp
+    if input == "save"
+      game.save_game
+      return nil
+    end
     coord_from, coord_to = parse(input)
     selected_piece = game_board[coord_from]
 
@@ -78,6 +99,7 @@ class Human
   end
   
   def initial_parse(command) #change from chess readable format
+    
     dict = Board::LETTERS.invert
     string = ""
     command.chars.map! do |char|
@@ -114,5 +136,33 @@ class Human
 end
 
 if __FILE__ == $PROGRAM_NAME
-  Chess.new.play
+  puts "load saved game? (y/n)"
+  answer = gets.chomp
+  case answer
+  when "y"
+    game = nil
+    until game
+      puts "What is the name of your saved game?"
+      name = gets.chomp + ".rf"
+      if File.exist?(name)
+        game = File.read(name)
+         
+      else
+        puts "no such file"
+      end
+    end
+    list = game.split("DIVIDE")
+    board_game_string, color = list
+    board_game = YAML::load(board_game_string)
+    if color == "white"
+      black_to_move = false
+    else
+      black_to_move = true
+    end
+    Chess.new(board_game, black_to_move).play
+  when "n"
+    Chess.new.play
+  else
+    "I dont understand"
+  end
 end
